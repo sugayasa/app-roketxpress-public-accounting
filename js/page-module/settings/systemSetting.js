@@ -550,7 +550,7 @@ function generateRowAccountPostingJournal(idAccount, accountCode, accountName, d
                 '<td>'+accountName+'</td>'+
                 '<td class="text-center"><i class="text-info fa fa-trash text16px" onclick="deletePostingJournalAccount(\'' + idAccount + '\', \'' + drCrType + '\')"></i></td>'+
             '</tr>';
- }
+}
 
 function resetModalPostingJournalAccounts() {
     setOptionHelper('modalPostingJournalAccounts-addAccount-optionAccountMain', 'dataAccountMain', false, function (firstValueAccountMain) {

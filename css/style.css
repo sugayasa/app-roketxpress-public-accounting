@@ -27543,6 +27543,20 @@ body.skin-dark [dir="rtl"] .widget-chat-submission,
 .tableFixHead thead th {
     position: sticky;
     top: -2px;
+    z-index: 1000;
+}
+
+.tableFix > thead:first-child > tr > th:first-child {
+	position:sticky;
+	left:0px;
+	z-index: 1001;
+}
+.tableFix > tbody > tr > td:first-child {
+	position:sticky;
+	left:0px;
+	z-index: 999;
+	background-color: #fafafa;
+	border-top: 1px solid #dee2e6;
 }
 
 .loader-modal .modal-dialog {
