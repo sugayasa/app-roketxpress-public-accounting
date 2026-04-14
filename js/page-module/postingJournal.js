@@ -109,16 +109,28 @@ function resetPostingJournalForm(typeJournal) {
 
     switch (typeJournal) {
         case 1:
-            tabName     =   'revenueOTATab';
+            tabName =   'revenueOTATab';
             $('#revenueOTATab-totalRevenueAmount, #revenueOTATab-totalRevenueAmountIDR, #revenueOTATab-totalJournalPostAmount').html(0);
             break;
         case 2:
-            tabName     =   'paymentOTATab';
+            tabName =   'paymentOTATab';
             $('#paymentOTATab-totalRevenueAmount, #paymentOTATab-totalRevenueAmountIDR, #paymentOTATab-totalJournalPostAmount').html(0);
             break;
         case 3:
-            tabName     =   'costVendorTab';
+            tabName =   'costVendorTab';
             $('#costVendorTab-totalCostAmount, #costVendorTab-totalJournalPostAmount').html(0);
+            break;
+        case 4:
+            tabName =   'paymentVendorTab';
+            $('#paymentVendorTab-totalPaymentAmount, #paymentVendorTab-totalJournalPostAmount').html(0);
+            break;
+        case 5:
+            tabName =   'costDriverTab';
+            $('#costDriverTab-totalCostAmount, #costDriverTab-totalJournalPostAmount').html(0);
+            break;
+        case 6:
+            tabName =   'paymentDriverTab';
+            $('#paymentDriverTab-totalPaymentAmount, #paymentDriverTab-totalJournalPostAmount').html(0);
             break;
     }
 
@@ -139,6 +151,9 @@ function setPostingJournalNotAvailable(typeJournal) {
         case 1: tabName = 'revenueOTATab'; break;
         case 2: tabName = 'paymentOTATab'; break;
         case 3: tabName = 'costVendorTab'; break;
+        case 4: tabName = 'paymentVendorTab'; break;
+        case 5: tabName = 'costDriverTab'; break;
+        case 6: tabName = 'paymentDriverTab'; break;
     }
 
     $tableBody  =	$('#' + tabName + '-tableSubJournal > tbody'),
@@ -149,6 +164,7 @@ function setPostingJournalNotAvailable(typeJournal) {
 function setDataPostingJournal(typeJournal, data, arrInitiateParam = {}) {
     let dataRecapPerOTA         =   data.dataRecapPerOTA != null && data.dataRecapPerOTA != undefined ? data.dataRecapPerOTA : [],
         dataRecapPerVendor      =   data.dataRecapPerVendor != null && data.dataRecapPerVendor != undefined ? data.dataRecapPerVendor : [],
+        dataRecapPerDriver      =   data.dataRecapPerDriver != null && data.dataRecapPerDriver != undefined ? data.dataRecapPerDriver : [],
         dataJournalSub          =   data.dataJournalSub != null && data.dataJournalSub != undefined ? data.dataJournalSub : [],
         elemListOTAVendorDriver =   '';
 
@@ -176,15 +192,18 @@ function setDataPostingJournal(typeJournal, data, arrInitiateParam = {}) {
             activateOnchangeTabListOTAVendorDriver(dataRecapPerOTA);
             break;
         case 3:
+        case 4:
             if (dataRecapPerVendor.length > 0) {
                 $.each(dataRecapPerVendor, function(index, arrayRecapPerVendor){
-                    let activeClass =   index == 0 ? 'active' : '';
-                    elemListOTAVendorDriver +=  '<li class="nav-item">\
-                                                    <span class="nav-link pt-1 pb-1 ' + activeClass + '" data-toggle="tab" data-idVendor="' + arrayRecapPerVendor.IDVENDOR + '">' + arrayRecapPerVendor.VENDORNAME + '</span>\
-                                                </li>';
+                    let activeClass             =   index == 0 ? 'active' : '',
+                        idWithdrawalRecapAttr   =   typeJournal == 4 ? 'data-idWithdrawalRecap="' + arrayRecapPerVendor.IDWITHDRAWALRECAP + '"' : '';
+                    elemListOTAVendorDriver     +=  '<li class="nav-item">\
+                                                        <span class="nav-link pt-1 pb-1 ' + activeClass + '" data-toggle="tab" data-idVendor="' + arrayRecapPerVendor.IDVENDOR + '" ' + idWithdrawalRecapAttr + '>' + arrayRecapPerVendor.VENDORNAME + '</span>\
+                                                    </li>';
                     if(index == 0) {
                         generateDetailPostingJournal(index, dataRecapPerVendor);
-                        generateJournalSubCostVendor(dataJournalSub, parseInt(arrayRecapPerVendor.ISJOURNALPOSTED));
+                        if(typeJournal == 3) generateJournalSubCostVendor(dataJournalSub, parseInt(arrayRecapPerVendor.ISJOURNALPOSTED));
+                        if(typeJournal == 4) generateJournalSubPaymentVendor(dataJournalSub, parseInt(arrayRecapPerVendor.ISJOURNALPOSTED));
                     }
                 });
             } else {
@@ -194,6 +213,29 @@ function setDataPostingJournal(typeJournal, data, arrInitiateParam = {}) {
 
             $('#postingJournal-listOTAVendorDriver').html(elemListOTAVendorDriver);
             activateOnchangeTabListOTAVendorDriver(dataRecapPerVendor);
+            break;
+        case 5:
+        case 6:
+            if (dataRecapPerDriver.length > 0) {
+                $.each(dataRecapPerDriver, function(index, arrayRecapPerDriver){
+                    let activeClass             =   index == 0 ? 'active' : '',
+                        idWithdrawalRecapAttr   =   typeJournal == 6 ? 'data-idWithdrawalRecap="' + arrayRecapPerDriver.IDWITHDRAWALRECAP + '"' : '';
+                    elemListOTAVendorDriver     +=  '<li class="nav-item">\
+                                                        <span class="nav-link pt-1 pb-1 ' + activeClass + '" data-toggle="tab" data-idDriver="' + arrayRecapPerDriver.IDDRIVER + '" ' + idWithdrawalRecapAttr + '>' + arrayRecapPerDriver.DRIVERNAME + '</span>\
+                                                    </li>';
+                    if(index == 0) {
+                        generateDetailPostingJournal(index, dataRecapPerDriver);
+                        if(typeJournal == 5) generateJournalSubCostDriver(dataJournalSub, parseInt(arrayRecapPerDriver.ISJOURNALPOSTED));
+                        if(typeJournal == 6) generateJournalSubPaymentDriver(dataJournalSub, parseInt(arrayRecapPerDriver.ISJOURNALPOSTED));
+                    }
+                });
+            } else {
+                elemListOTAVendorDriver =   '<li class="nav-item">No data available</li>';
+                setPostingJournalNotAvailable(typeJournal);
+            }
+
+            $('#postingJournal-listOTAVendorDriver').html(elemListOTAVendorDriver);
+            activateOnchangeTabListOTAVendorDriver(dataRecapPerDriver);
             break;
     }
 
@@ -210,6 +252,15 @@ function setDataPostingJournal(typeJournal, data, arrInitiateParam = {}) {
         if(arrInitiateParam.idVendor != null && arrInitiateParam.idVendor != undefined) {
             $('#postingJournal-listOTAVendorDriver .nav-link').each(function(index){
                 if($(this).data('idvendor') == arrInitiateParam.idVendor) {
+                    $(this).trigger('click');
+                    return false;
+                }
+            });
+        }
+
+        if(arrInitiateParam.idDriver != null && arrInitiateParam.idDriver != undefined) {
+            $('#postingJournal-listOTAVendorDriver .nav-link').each(function(index){
+                if($(this).data('iddriver') == arrInitiateParam.idDriver) {
                     $(this).trigger('click');
                     return false;
                 }
@@ -299,7 +350,7 @@ function calculateTotalDebitCreditJournalPosting() {
     $('#postingJournal-accountTotalNominalCredit').html(numberFormat(totalCredit));
 }
 
-//revenue OTA
+//Revenue OTA
 function generateJournalSubRevenueOTA(dataJournalSub, defaultCurrency = '', isJournalPosted = 0) {
     let $tableBody  =	$('#revenueOTATab-tableSubJournal > tbody'),
         columnNumber=	$('#revenueOTATab-tableSubJournal > thead > tr > th').length;
@@ -398,7 +449,7 @@ function calculateTotalSelectedRevenueSubOTA() {
     $('.postingJournal-accountNominalDebit, .postingJournal-accountNominalCredit').val(numberFormat(totalRevenueAmountIDR));
     calculateTotalDebitCreditJournalPosting();
 }
-//revenue OTA end
+//Revenue OTA end
 
 //payment OTA
 function generateJournalSubPaymentOTA(dataJournalSub, defaultCurrency = '', isJournalPosted = 0) {
@@ -590,6 +641,184 @@ function calculateTotalSelectedCostSubVendor() {
 }
 //Cost Vendor end
 
+//Payment Vendor
+function generateJournalSubPaymentVendor(dataJournalSub, isJournalPosted = 0) {
+    let $tableBody  =	$('#paymentVendorTab-tableSubJournal > tbody'),
+        columnNumber=	$('#paymentVendorTab-tableSubJournal > thead > tr > th').length;
+    if(dataJournalSub.length > 0) {
+        let rowTable                =   '',
+            totalPaymentAmount      =   totalJournalPostAmount  =   0,
+            totalCheckedSubJournal  =   0;
+
+        $.each(dataJournalSub, function(index, journalSub){
+            let isSubJournalPosted  =   journalSub.ISSUBJOURNALPOSTED == 1 ? 1 : 0,
+                checkedCb           =   isSubJournalPosted == 1 ? 'checked' : '',
+                badgeStatusRow      =   '-',
+                paymentAmount       =   journalSub.PAYMENTAMOUNT ? parseFloat(journalSub.PAYMENTAMOUNT) : 0,
+                journalPostAmount   =   journalSub.JOURNALPOSTAMOUNT ? parseFloat(journalSub.JOURNALPOSTAMOUNT) : 0;
+
+            if(paymentAmount != journalPostAmount) {
+                if(isJournalPosted == 1) {
+                    badgeStatusRow  =   isSubJournalPosted == 1 ? '<span class="badge badge-danger">Not Match, Posted</span>' : '<span class="badge badge-info">Not Match, Pending</span>';
+                } else {
+                    badgeStatusRow  =   '<span class="badge badge-info">Pending</span>';
+                }
+            } else if(paymentAmount == journalPostAmount) {
+                if(isJournalPosted == 1) {
+                    badgeStatusRow  =   isSubJournalPosted == 1 ? '<span class="badge badge-success">Match, Posted</span>' : '<span class="badge badge-info">Match, Pending</span>';
+                } else {
+                    badgeStatusRow  =   '<span class="badge badge-info">Match, Pending</span>';
+                }
+            }
+
+            rowTable    +=  '<tr>\
+                                <td><label class="adomx-checkbox"><input type="checkbox" name="paymentVendorTab-cbSubJournal[]" class="paymentVendorTab-cbSubJournal" value="'+journalSub.IDRESERVATIONDETAILS+'" '+checkedCb+'> <i class="icon"></i></label></td>\
+                                <td>'+journalSub.REFFNUMBER+'</td>\
+                                <td>'+journalSub.BOOKINGCODE+'</td>\
+                                <td>'+journalSub.CUSTOMERNAME+'</td>\
+                                <td>'+journalSub.RESERVATIONTITLE+'</td>\
+                                <td>'+journalSub.PRODUCTNAME+'</td>\
+                                <td class="text-right">'+numberFormat(paymentAmount)+'</td>\
+                                <td class="text-right">'+numberFormat(journalPostAmount)+'</td>\
+                                <td>'+badgeStatusRow+'</td>\
+                            </tr>';
+            totalPaymentAmount      += paymentAmount;
+            totalJournalPostAmount  += journalPostAmount;
+
+            if(isSubJournalPosted == 1) totalCheckedSubJournal++;
+        });
+
+        $tableBody.html(rowTable);
+        calculateTotalSelectedPaymentSubVendor();
+        $('#paymentVendorTab-totalJournalPostAmount').html(numberFormat(totalJournalPostAmount));
+        $("#paymentVendorTab-cbCheckAllSub").prop("checked", totalCheckedSubJournal > 0 && totalCheckedSubJournal === dataJournalSub.length);
+        activateOnClickCheckBoxAllPaymentVendor();
+        calculateTotalDebitCreditJournalPosting();
+    } else {
+        $tableBody.html('<tr><td colspan="' + columnNumber + '" align="center">No data available</td></tr>');
+    }
+}
+
+function activateOnClickCheckBoxAllPaymentVendor() {
+	$("#paymentVendorTab-cbCheckAllSub").off('click');
+    $("#paymentVendorTab-cbCheckAllSub").on('click', function () {
+        let thisChecked = this.checked;
+        $(".paymentVendorTab-cbSubJournal").prop("checked", thisChecked);
+        calculateTotalSelectedPaymentSubVendor();
+    });
+
+    $(".paymentVendorTab-cbSubJournal").off('click');
+    $(".paymentVendorTab-cbSubJournal").on('click', function () {
+        let totalReservationPaymentVendor = $(".paymentVendorTab-cbSubJournal").length,
+            totalReservationPaymentVendorChecked = $(".paymentVendorTab-cbSubJournal:checked").length;
+        $("#paymentVendorTab-cbCheckAllSub").prop("checked", totalReservationPaymentVendor == totalReservationPaymentVendorChecked);
+        calculateTotalSelectedPaymentSubVendor();
+    });
+}
+
+function calculateTotalSelectedPaymentSubVendor() {
+    let totalPaymentAmount      =   0;
+
+    $.each($(".paymentVendorTab-cbSubJournal:checked"), function(index, elem){
+        let paymentAmount   =   parseFloat($(elem).closest('tr').find('td').eq(6).text().replace(/,/g, ''));
+        totalPaymentAmount  +=  paymentAmount;
+    });
+
+    $('#paymentVendorTab-totalPaymentAmount').html(numberFormat(totalPaymentAmount));
+    $('.postingJournal-accountNominalDebit, .postingJournal-accountNominalCredit').val(numberFormat(totalPaymentAmount));
+    calculateTotalDebitCreditJournalPosting();
+}
+//Payment Vendor end
+
+//Cost Driver
+function generateJournalSubCostDriver(dataJournalSub, isJournalPosted = 0) {
+    let $tableBody  =	$('#costDriverTab-tableSubJournal > tbody'),
+        columnNumber=	$('#costDriverTab-tableSubJournal > thead > tr > th').length;
+    if(dataJournalSub.length > 0) {
+        let rowTable                =   '',
+            totalCostAmount         =   totalJournalPostAmount  =   0,
+            totalCheckedSubJournal  =   0;
+
+        $.each(dataJournalSub, function(index, journalSub){
+            let isSubJournalPosted  =   journalSub.ISSUBJOURNALPOSTED == 1 ? 1 : 0,
+                checkedCb           =   isSubJournalPosted == 1 ? 'checked' : '',
+                badgeStatusRow      =   '-',
+                costAmount          =   journalSub.COSTAMOUNT ? parseFloat(journalSub.COSTAMOUNT) : 0,
+                journalPostAmount   =   journalSub.JOURNALPOSTAMOUNT ? parseFloat(journalSub.JOURNALPOSTAMOUNT) : 0;
+
+            if(costAmount != journalPostAmount) {
+                if(isJournalPosted == 1) {
+                    badgeStatusRow  =   isSubJournalPosted == 1 ? '<span class="badge badge-danger">Not Match, Posted</span>' : '<span class="badge badge-info">Not Match, Pending</span>';
+                } else {
+                    badgeStatusRow  =   '<span class="badge badge-info">Pending</span>';
+                }
+            } else if(costAmount == journalPostAmount) {
+                if(isJournalPosted == 1) {
+                    badgeStatusRow  =   isSubJournalPosted == 1 ? '<span class="badge badge-success">Match, Posted</span>' : '<span class="badge badge-info">Match, Pending</span>';
+                } else {
+                    badgeStatusRow  =   '<span class="badge badge-info">Match, Pending</span>';
+                }
+            }
+
+            rowTable    +=  '<tr>\
+                                <td><label class="adomx-checkbox"><input type="checkbox" name="costDriverTab-cbSubJournal[]" class="costDriverTab-cbSubJournal" value="'+journalSub.IDRESERVATIONDETAILS+'" '+checkedCb+'> <i class="icon"></i></label></td>\
+                                <td>'+journalSub.REFFNUMBER+'</td>\
+                                <td>'+journalSub.BOOKINGCODE+'</td>\
+                                <td>'+journalSub.CUSTOMERNAME+'</td>\
+                                <td>'+journalSub.RESERVATIONTITLE+'</td>\
+                                <td>'+journalSub.PRODUCTNAME+'</td>\
+                                <td class="text-right">'+numberFormat(costAmount)+'</td>\
+                                <td class="text-right">'+numberFormat(journalPostAmount)+'</td>\
+                                <td>'+badgeStatusRow+'</td>\
+                            </tr>';
+            totalCostAmount         += costAmount;
+            totalJournalPostAmount  += journalPostAmount;
+
+            if(isSubJournalPosted == 1) totalCheckedSubJournal++;
+        });
+
+        $tableBody.html(rowTable);
+        calculateTotalSelectedCostSubDriver();
+        $('#costDriverTab-totalJournalPostAmount').html(numberFormat(totalJournalPostAmount));
+        $("#costDriverTab-cbCheckAllSub").prop("checked", totalCheckedSubJournal > 0 && totalCheckedSubJournal === dataJournalSub.length);
+        activateOnClickCheckBoxAllCostDriver();
+        calculateTotalDebitCreditJournalPosting();
+    } else {
+        $tableBody.html('<tr><td colspan="' + columnNumber + '" align="center">No data available</td></tr>');
+    }
+}
+
+function activateOnClickCheckBoxAllCostDriver() {
+	$("#costDriverTab-cbCheckAllSub").off('click');
+    $("#costDriverTab-cbCheckAllSub").on('click', function () {
+        let thisChecked = this.checked;
+        $(".costDriverTab-cbSubJournal").prop("checked", thisChecked);
+        calculateTotalSelectedCostSubDriver();
+    });
+
+    $(".costDriverTab-cbSubJournal").off('click');
+    $(".costDriverTab-cbSubJournal").on('click', function () {
+        let totalReservationCostDriver = $(".costDriverTab-cbSubJournal").length,
+            totalReservationCostDriverChecked = $(".costDriverTab-cbSubJournal:checked").length;
+        $("#costDriverTab-cbCheckAllSub").prop("checked", totalReservationCostDriver == totalReservationCostDriverChecked);
+        calculateTotalSelectedCostSubDriver();
+    });
+}
+
+function calculateTotalSelectedCostSubDriver() {
+    let totalCostAmount      =   0;
+
+    $.each($(".costDriverTab-cbSubJournal:checked"), function(index, elem){
+        let costAmount   =   parseFloat($(elem).closest('tr').find('td').eq(6).text().replace(/,/g, ''));
+        totalCostAmount      += costAmount;
+    });
+
+    $('#costDriverTab-totalCostAmount').html(numberFormat(totalCostAmount));
+    $('.postingJournal-accountNominalDebit, .postingJournal-accountNominalCredit').val(numberFormat(totalCostAmount));
+    calculateTotalDebitCreditJournalPosting();
+}
+//Cost Driver end
+
 function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
     $('#postingJournal-listOTAVendorDriver .nav-link').off('click');
     $('#postingJournal-listOTAVendorDriver .nav-link').on('click', function (e) {
@@ -599,6 +828,8 @@ function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
             index               =   $(this).parent().index(),
             idSource            =   $(this).data('idsource'),
             idVendor            =   $(this).data('idvendor'),
+            idDriver            =   $(this).data('iddriver'),
+            idWithdrawalRecap   =   $(this).data('idwithdrawalrecap'),
             dataDetailJournal   =   dataRecapJournal[index],
             defaultCurrency     =   dataDetailJournal.DEFAULTCURRENCY != null && dataDetailJournal.DEFAULTCURRENCY != undefined ? dataDetailJournal.DEFAULTCURRENCY : '',
             isJournalPosted     =   parseInt(dataDetailJournal.ISJOURNALPOSTED),
@@ -606,7 +837,7 @@ function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
             urlGetDataJournalSub=   '',
             $tableBody          =	null,
             columnNumber        =	0,
-            dataSend            =   { dateJournal: dateJournal, idCompany: idCompany, idSource: idSource, idVendor: idVendor };
+            dataSend            =   { dateJournal: dateJournal, idCompany: idCompany, idSource: idSource, idVendor: idVendor, idDriver: idDriver, idWithdrawalRecap: idWithdrawalRecap };
         generateDetailPostingJournal(index, dataRecapJournal);
 
         switch (typePostingJournal) {
@@ -621,6 +852,22 @@ function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
             case 3:
                 tabName             =   'costVendorTab';
                 urlGetDataJournalSub=   "getDataPostingJournalCostVendorSub";
+                break;
+            case 4:
+                tabName             =   'paymentVendorTab';
+                urlGetDataJournalSub=   "getDataPostingJournalPaymentVendorSub";
+                break;
+            case 5:
+                tabName             =   'costDriverTab';
+                urlGetDataJournalSub=   "getDataPostingJournalCostDriverSub";
+                break;
+            case 5:
+                tabName             =   'costDriverTab';
+                urlGetDataJournalSub=   "getDataPostingJournalCostDriverSub";
+                break;
+            case 6:
+                tabName             =   'paymentDriverTab';
+                urlGetDataJournalSub=   "getDataPostingJournalPaymentDriverSub";
                 break;
         }
 
@@ -659,6 +906,18 @@ function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
                         $("#costVendorTab-cbCheckAllSub").prop("checked", false);
                         $('#costVendorTab-totalCostAmount, #costVendorTab-totalJournalPostAmount').html(0);
                         break;
+                    case 4:
+                        $("#paymentVendorTab-cbCheckAllSub").prop("checked", false);
+                        $('#paymentVendorTab-totalPaymentAmount, #paymentVendorTab-totalJournalPostAmount').html(0);
+                        break;
+                    case 5:
+                        $("#costDriverTab-cbCheckAllSub").prop("checked", false);
+                        $('#costDriverTab-totalCostAmount, #costDriverTab-totalJournalPostAmount').html(0);
+                        break;
+                    case 6:
+                        $("#paymentDriverTab-cbCheckAllSub").prop("checked", false);
+                        $('#paymentDriverTab-totalPaymentAmount, #paymentDriverTab-totalJournalPostAmount').html(0);
+                        break;
                 }
             },
             complete: function (jqXHR, textStatus) {
@@ -675,6 +934,15 @@ function activateOnchangeTabListOTAVendorDriver(dataRecapJournal) {
                                 break;
                             case 3:
                                 generateJournalSubCostVendor(dataJournalSub, isJournalPosted);
+                                break;
+                            case 4:
+                                generateJournalSubPaymentVendor(dataJournalSub, isJournalPosted);
+                                break;
+                            case 5:
+                                generateJournalSubCostDriver(dataJournalSub, isJournalPosted);
+                                break;
+                            case 6:
+                                generateJournalSubPaymentDriver(dataJournalSub, isJournalPosted);
                                 break;
                         }
                         break;
@@ -717,12 +985,14 @@ $("#postingJournal-saveJournal").on('click', function (e) {
         let idCompany   =   $('#optionCompany').val(),
             idSource    =   $('#postingJournal-listOTAVendorDriver').find('.nav-link.active').data('idsource'),
             idVendor    =   $('#postingJournal-listOTAVendorDriver').find('.nav-link.active').data('idvendor'),
+            idDriver    =   $('#postingJournal-listOTAVendorDriver').find('.nav-link.active').data('iddriver'),
             date        =   $('#dateJournal').val(),
             dataSend    =   {
                 journalPostingType: typePostingJournal,
                 idCompany: idCompany,
                 idSource: idSource,
                 idVendor: idVendor,
+                idDriver: idDriver,
                 date: date,
                 nominal: totalNominalAccountDebit,
                 description: journalDescription,
@@ -771,6 +1041,30 @@ $("#postingJournal-saveJournal").on('click', function (e) {
                     dataSend.arrSubJournal.push([ idReservationDetails, nominalPayment ]);
                 });
                 break;
+            case 4:
+                functionSaveJournal = "saveDataPostingJournalVendor";
+                $.each($(".paymentVendorTab-cbSubJournal:checked"), function(index, elem){
+                    let idReservationDetails=   $(elem).val(),
+                        nominalPayment      =   parseFloat($(elem).closest('tr').find('td').eq(6).text().replace(/,/g, ''));
+                    dataSend.arrSubJournal.push([ idReservationDetails, nominalPayment ]);
+                });
+                break;
+            case 5:
+                functionSaveJournal = "saveDataPostingJournalDriver";
+                $.each($(".costDriverTab-cbSubJournal:checked"), function(index, elem){
+                    let idReservationDetails=   $(elem).val(),
+                        nominalCost         =   parseFloat($(elem).closest('tr').find('td').eq(6).text().replace(/,/g, ''));
+                    dataSend.arrSubJournal.push([ idReservationDetails, nominalCost ]);
+                });
+                break;
+            case 6:
+                functionSaveJournal = "saveDataPostingJournalDriver";
+                $.each($(".paymentDriverTab-cbSubJournal:checked"), function(index, elem){
+                    let idReservationDetails=   $(elem).val(),
+                        nominalCost         =   parseFloat($(elem).closest('tr').find('td').eq(6).text().replace(/,/g, ''));
+                    dataSend.arrSubJournal.push([ idReservationDetails, nominalCost ]);
+                });
+                break;
         }
         
         $.ajax({
@@ -802,7 +1096,12 @@ $("#postingJournal-saveJournal").on('click', function (e) {
                                 paramInitiate = { idSource: idSource };
                                 break;
                             case 3:
+                            case 4:
                                 paramInitiate = { idVendor: idVendor };
+                                break;
+                            case 5:
+                            case 6:
+                                paramInitiate = { idDriver: idDriver };
                                 break;
                         }
                         getDataPostingJournal(typePostingJournal, paramInitiate);

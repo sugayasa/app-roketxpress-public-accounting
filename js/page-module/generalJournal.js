@@ -993,8 +993,8 @@ $("#form-addAccountJournal").on("submit", function (e) {
         description         = $('#addAccountJournal-description').val(),
         nominalTransaction  = $('#addAccountJournal-nominalTransaction').val(),
         nominalTransactionInt = nominalTransaction.replace(/[^0-9\.]+/g, '') * 1,
-        debitNominal        = debitCredit == 'DR' ? nominalTransaction : 0,
-        creditNominal       = debitCredit == 'CR' ? nominalTransaction : 0;
+        debitNominal        = debitCredit == 'DR' ? nominalTransactionInt : 0,
+        creditNominal       = debitCredit == 'CR' ? nominalTransactionInt : 0;
 
     if (nominalTransactionInt <= 0) {
         showWarning('Please input valid nominal');
